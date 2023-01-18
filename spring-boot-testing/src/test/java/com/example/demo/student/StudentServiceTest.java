@@ -1,13 +1,13 @@
 package com.example.demo.student;
 
 import com.example.demo.student.exception.BadRequestException;
+import com.example.demo.student.exception.StudentNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -82,6 +82,30 @@ class StudentServiceTest {
     }
 
     @Test
-    void deleteStudent() {
+    void testDeleteStudent() {
+        // given
+        long id = 10;
+        given(studentRepository.existsById(id))
+                .willReturn(true);
+        // when
+        underTest.deleteStudent(id);
+
+        // then
+        verify(studentRepository).deleteById(id);
+    }
+
+    @Test
+    void testDeleteNonExistentStudent() {
+        // given
+        long id = 10;
+        given(studentRepository.existsById(id))
+                .willReturn(false);
+        // when
+        // then
+        assertThatThrownBy(() -> underTest.deleteStudent(id))
+                .isInstanceOf(StudentNotFoundException.class)
+                .hasMessageContaining("Student with id " + id + " does not exists");
+
+        verify(studentRepository, never()).deleteById(any());
     }
 }
